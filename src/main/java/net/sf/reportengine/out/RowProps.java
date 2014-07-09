@@ -28,11 +28,14 @@ public class RowProps {
      */
     private final int rowNumber; 
     
+    
+    private final boolean total;
+    
     /**
      * 
      */
     public RowProps(){
-    	this(ReportContent.DATA, 0);
+    	this(ReportContent.DATA, 0, false);
     }
     
     /**
@@ -40,7 +43,7 @@ public class RowProps {
      * @param content
      */
     public RowProps(ReportContent content){
-    	this(content, 0); 
+    	this(content, 0, false); 
     }
     
     /**
@@ -48,9 +51,10 @@ public class RowProps {
      * @param content
      * @param rowNumber
      */
-    public RowProps(ReportContent content, int rowNumber){
+    public RowProps(ReportContent content, int rowNumber, boolean total){
     	this.reportContent = content; 
     	this.rowNumber = rowNumber; 
+    	this.total = total;
     }
     
     /**
@@ -68,4 +72,8 @@ public class RowProps {
     public int getRowNumber(){
     	return rowNumber; 
     }
+    
+    public boolean isTotal() {
+		return total;
+	}
 }

@@ -41,9 +41,9 @@ public class OutputDispatcher implements IReportOutput{
         }
     }
     
-    public void endRow(){
+    public void endRow(RowProps rowProperties){
     	for(IReportOutput output: outputtersList){
-            output.endRow();
+            output.endRow(rowProperties);
         }
     }
     
@@ -78,4 +78,6 @@ public class OutputDispatcher implements IReportOutput{
 	public String getWhiteSpace() {
 		return " ";
 	}
+	
+	public void write(Object string) {}
 }

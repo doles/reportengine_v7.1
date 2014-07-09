@@ -44,8 +44,8 @@ public class FlatReportTotalsOutputStep extends AbstractReportStep {
 	private static final Logger logger = Logger.getLogger(FlatReportTotalsOutputStep.class);
 	
 	
-	public static final String TOTAL_STRING = "Total";
-	public static final String GRAND_TOTAL_STRING = "Grand Total";
+	public static String TOTAL_STRING = "Total";
+	public static String GRAND_TOTAL_STRING = "Grand Total";
    
     
     /**
@@ -110,15 +110,15 @@ public class FlatReportTotalsOutputStep extends AbstractReportStep {
     public void exit() {
         ICalculator[][] calculators = getCalculatorMatrix();
         
-        if(groupCols != null){
+        if(groupCols != null && getShowTotals()){
         	//calculators.length-2 because for levelCalculators.lenght-1 is a separate call
         	//(a call for Grand total see below)
-        	outputTotalRowsFromTo(0, calculators.length-2);
+        	outputTotalRowsFromTo(0, calculators.length-1);
         }
         
         //now the grand total
         if(getShowGrandTotal()){
-        	//outputTotalsRow("Grand Total", calculators[calculators.length-1]);
+        	//outputTotalsRow("Grand Total", calculators[calculators.length-1]);        	
         	outputTotalsRow(GRAND_TOTAL_GROUPING_LEVEL, 
         					calculators[calculators.length-1]
         					);	
@@ -161,8 +161,13 @@ public class FlatReportTotalsOutputStep extends AbstractReportStep {
     		throw new IllegalArgumentException("dataRows and distributionOfCalculators arrays should have the same length"); 
     	}
     	
+    	//if not totals afte each group
+    	if(!getShowTotals() && groupLevel>-1){
+    		return;
+    	}
+    	
     	IReportOutput output = getOutput();
-    	output.startRow(new RowProps(ReportContent.DATA));
+    	output.startRow(new RowProps(ReportContent.DATA, 0, true));
     	
     	if(groupCols != null && groupCols.size() > 0){
     		//prepare and output the Total column
@@ -209,6 +214,6 @@ public class FlatReportTotalsOutputStep extends AbstractReportStep {
 				output.output(CellProps.EMPTY_CELL);
 			}
 		}
-    	output.endRow();
+    	output.endRow(new RowProps(ReportContent.DATA, 0, true));
     }
 }

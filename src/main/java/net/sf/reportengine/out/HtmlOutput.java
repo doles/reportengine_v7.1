@@ -100,6 +100,9 @@ public class HtmlOutput extends AbstractCharacterOutput {
     * opens the output
     */
     public void open() {
+    	if(super.isOutputOpen()){
+    		return;
+    	}
         try {
             super.open();
             if(isStandalonePage){
@@ -165,9 +168,9 @@ public class HtmlOutput extends AbstractCharacterOutput {
    /**
     * end row
     */
-    public void endRow(){
+    public void endRow(RowProps rowProperties){
         try{
-            super.endRow();
+            super.endRow(rowProperties);
             getOutputWriter().write("</tr>"); 
             getOutputWriter().write(ReportIoUtils.LINE_SEPARATOR);
         }catch (IOException ioExc) {
@@ -226,5 +229,10 @@ public class HtmlOutput extends AbstractCharacterOutput {
 	 */
 	public void setCssPath(String cssPath) {
 		this.cssPath = cssPath;
+	}
+	
+	
+	public void write(Object string) throws IOException{
+		getOutputWriter().write(purifyData(string));		
 	}
 }

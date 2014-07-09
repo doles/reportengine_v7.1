@@ -6,6 +6,9 @@ package net.sf.reportengine.core.calc;
 
 import java.math.BigDecimal;
 
+import net.sf.reportengine.config.IDataColumn;
+import net.sf.reportengine.core.algorithm.NewRowEvent;
+
 
 /**
  * Average calculator. 
@@ -46,16 +49,22 @@ class AvgCalculator extends SumCalculator {
     /**
      * compute
      */
-    public void compute(Object newValue){
+    public void compute(Object newValue){   
         super.compute(newValue);
         elementsCount ++;
+    }
+    
+    @Override
+    public void compute(IDataColumn column, NewRowEvent row) {
+    	super.compute(column, row);
+    	//elementsCount ++;
     }
 
     /**
      * result getter
      */
     public Object getResult(){
-    	BigDecimal sum = (BigDecimal)super.getResult(); 
+    	BigDecimal sum = (BigDecimal)super.getResult();
     	return sum.doubleValue() / elementsCount; 
         //return ((BigDecimal)super.getResult()).divide(new BigDecimal(elementsCount), BigDecimal.ROUND_HALF_EVEN);
     }

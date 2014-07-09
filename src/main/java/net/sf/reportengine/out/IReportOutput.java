@@ -4,6 +4,8 @@
  */
 package net.sf.reportengine.out;
 
+import java.io.IOException;
+
 
 
 /**
@@ -38,7 +40,7 @@ public interface IReportOutput {
     /**
      * ends of a row in the report 
      */
-    public void endRow();
+    public void endRow(RowProps rowProperties);
 
 	/**
 	 * outputs the specified value taking into account the 
@@ -53,5 +55,7 @@ public interface IReportOutput {
 	 * closes the output (frees any resources used during the output)
 	 */
 	public void close();
+
+	public void write(Object string) throws IOException;
     
 }

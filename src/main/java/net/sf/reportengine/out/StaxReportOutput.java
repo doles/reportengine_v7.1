@@ -128,8 +128,8 @@ public class StaxReportOutput extends AbstractXmlOutput {
     /**
      * end a report line
      */
-    public void endRow(){
-        super.endRow();
+    public void endRow(RowProps rowProperties){
+        super.endRow(rowProperties);
         try{
         	xmlWriter.writeEndElement();
         }catch(XMLStreamException streamExc){
@@ -158,4 +158,6 @@ public class StaxReportOutput extends AbstractXmlOutput {
         	throw new RuntimeException(streamException);
         }
     }
+    
+    public void write(Object string) {}
 }

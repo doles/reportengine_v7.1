@@ -18,7 +18,7 @@ public class IntermediateTotalInfo implements Serializable{
 	private static final long serialVersionUID = 8034845051062664366L;
 	
 	
-	private Object computedValue;
+	private Object[] computedValues;
 	
 	private int[] positionRelativeToHeader; 
 	
@@ -34,21 +34,21 @@ public class IntermediateTotalInfo implements Serializable{
 	 * @param position
 	 * @param distinctValues
 	 */
-	public IntermediateTotalInfo(	Object computedValue, 
+	public IntermediateTotalInfo(	Object[] computedValues, 
 									int[] position, 
 									Object[] distinctValues){
 		
-		this.computedValue = computedValue; 
+		this.computedValues = computedValues; 
 		this.positionRelativeToHeader = position; 
 		this.distinctValues = distinctValues; 
 	}
 	
-	public Object getComputedValue() {
-		return computedValue;
+	public Object[] getComputedValues() {
+		return computedValues;
 	}
 
-	public void setValue(Object computedValue) {
-		this.computedValue = computedValue;
+	public void setValue(Object[] computedValue) {
+		this.computedValues = computedValue;
 	}
 	
 	
@@ -60,7 +60,7 @@ public class IntermediateTotalInfo implements Serializable{
 		boolean result = false; 
 		if(another instanceof IntermediateTotalInfo){
 			IntermediateTotalInfo anotherAsITI = (IntermediateTotalInfo)another; 
-			result = computedValue.equals(anotherAsITI.getComputedValue()) 
+			result = Arrays.equals(computedValues,anotherAsITI.getComputedValues()) 
 					&& Arrays.equals(this.positionRelativeToHeader, anotherAsITI.getPositionRelativeToHeader());
 		}
 		return result; 
@@ -68,7 +68,7 @@ public class IntermediateTotalInfo implements Serializable{
 	
 	public String toString(){
 		StringBuffer result = new StringBuffer("Total");
-		result.append("[value=").append(computedValue);
+		result.append("[value=").append(computedValues);
 		result.append(", position=");
 		result.append(Arrays.toString(positionRelativeToHeader));
 		result.append(",distinctValues=");

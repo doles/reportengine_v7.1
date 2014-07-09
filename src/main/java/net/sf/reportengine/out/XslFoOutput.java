@@ -279,8 +279,8 @@ public class XslFoOutput extends AbstractByteOutput {
     /**
      * 
      */
-    public void endRow(){
-    	staxReportOutput.endRow();
+    public void endRow(RowProps rowProperties){
+    	staxReportOutput.endRow(rowProperties);
     }
     
     /**
@@ -331,4 +331,6 @@ public class XslFoOutput extends AbstractByteOutput {
 		}
 		return result; 
 	}
+	
+	public void write(Object string) {}
 }

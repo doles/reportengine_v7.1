@@ -37,7 +37,7 @@ import org.apache.log4j.Logger;
  * @author dragos balan (dragos dot balan at gmail dot com)
  * @since 0.4
  */
-class IntermediateCrosstabReport extends AbstractOneIterationReport {
+public class IntermediateCrosstabReport extends AbstractOneIterationReport {
 	
 	/**
 	 * the logger
@@ -47,12 +47,13 @@ class IntermediateCrosstabReport extends AbstractOneIterationReport {
 	/**
 	 * 
 	 */
-	private ICrosstabData crosstabData; //TODO: try to remove the crosstab data from here
+	private List<ICrosstabData> crosstabDataList; //TODO: try to remove the crosstab data from here
 	
 	/**
 	 * 
 	 */
 	private List<? extends ICrosstabHeaderRow> crosstabHeaderRowsAsList; //TODO: remove the header rows and crosstabData from here ( they belong only to Crosstabreport)
+	
 	
 	/**
 	 * the initial group columns count
@@ -62,7 +63,16 @@ class IntermediateCrosstabReport extends AbstractOneIterationReport {
 	/**
 	 * the initial data columns count
 	 */
-	private int originalDataColsCount ;
+	private int originalDataColsCount;
+	
+
+	public List<ICrosstabData> getCrosstabDataList() {
+		return crosstabDataList;
+	}
+
+	public void setCrosstabDataList(List<ICrosstabData> crosstabDataList) {
+		this.crosstabDataList = crosstabDataList;
+	}	
 	
 	/**
 	 * 
@@ -94,8 +104,11 @@ class IntermediateCrosstabReport extends AbstractOneIterationReport {
 																getDataColumns(), 
 																getCrosstabHeaderRows());
 		//only the initial crosstab-data will be used as data column in this intermediate report
-		List<IDataColumn> intermediateDataCols = new ArrayList<IDataColumn>(1);
-		intermediateDataCols.add(new IntermDataColumnFromCrosstabData(crosstabData)); 
+		List<IDataColumn> intermediateDataCols = new ArrayList<IDataColumn>(getCrosstabDataList().size());
+		for(ICrosstabData crosstabData : getCrosstabDataList()){
+			intermediateDataCols.add(new IntermDataColumnFromCrosstabData(crosstabData)); 
+		}
+		
 		
 		//TODO: come back here. We need to take the last in the groupingLevel order not in the current order
 		/*new FlatDataColumnFromHeaderRow(crosstabHeaderRows[crosstabHeaderRows.length-1]), */ 
@@ -122,7 +135,7 @@ class IntermediateCrosstabReport extends AbstractOneIterationReport {
     	context.set(ContextKeys.CONTEXT_KEY_ORIGINAL_CT_GROUP_COLS_COUNT, originalGroupColsCount);
     	
 		context.set(ContextKeys.CONTEXT_KEY_CROSSTAB_HEADER_ROWS, getCrosstabHeaderRows()); 
-		context.set(ContextKeys.CONTEXT_KEY_CROSSTAB_DATA, crosstabData); 
+		context.set(ContextKeys.CONTEXT_KEY_CROSSTAB_DATA, getCrosstabDataList()); 
 		
 		//adding specific flat report steps to the algorithm
     	algorithm.addInitStep(new FlatReportExtractDataInitStep());
@@ -169,15 +182,7 @@ class IntermediateCrosstabReport extends AbstractOneIterationReport {
 	public void setCrosstabHeaderRows(List<? extends ICrosstabHeaderRow> crosstabHeaderRows){
 		this.crosstabHeaderRowsAsList = crosstabHeaderRows; 
 	}
-	
-	public ICrosstabData getCrosstabData() {
-		return crosstabData;
-	}
 
-	public void setCrosstabData(ICrosstabData crosstabData) {
-		this.crosstabData = crosstabData;
-	}
-	
 	/**
 	 * 
 	 * @param originalCtGroupingCols
@@ -199,6 +204,7 @@ class IntermediateCrosstabReport extends AbstractOneIterationReport {
 //													Arrays.asList(originalCtHeaderRows));
 //	}
 	
+
 	/**
 	 * transforms the original grouping + data + header columns into intermediate group columns
 	 * 
@@ -225,7 +231,7 @@ class IntermediateCrosstabReport extends AbstractOneIterationReport {
 			logger.debug(" originalCtHeaderRows="+originalCtHeaderRows);
 		}
 		
-		int intermedGroupColsLength = originalGroupColsLength + originalDataColsLength + originalCtHeaderRows.size() -1;
+		int intermedGroupColsLength = originalGroupColsLength + originalDataColsLength + originalCtHeaderRows.size();
 		List<IGroupColumn> result = new ArrayList<IGroupColumn>(intermedGroupColsLength);
 		
 		//from 0 to original groupCols.length we copy the original group columns
@@ -245,7 +251,7 @@ class IntermediateCrosstabReport extends AbstractOneIterationReport {
 		
 		//then we copy the header rows (of course transformed as groupCols)
 		//we don't need any grouping for the last header row (that's why we have headerRows.length-1 below
-		for (int i = 0; i < originalCtHeaderRows.size()-1; i++) {
+		for (int i = 0; i < originalCtHeaderRows.size(); i++) {
 			//result[originalGroupColsLength+originalDataColsLength+i] =
 			result.add(
 					new IntermGroupColFromHeaderRow(	originalCtHeaderRows.get(i), 
@@ -255,7 +261,7 @@ class IntermediateCrosstabReport extends AbstractOneIterationReport {
 		return result; 
 	}
 	
-	protected static class IntermDataColumnFromCrosstabData implements IDataColumn{
+	public static class IntermDataColumnFromCrosstabData implements IDataColumn{
 		
 		private ICrosstabData crosstabData;
 		
@@ -270,6 +276,10 @@ class IntermediateCrosstabReport extends AbstractOneIterationReport {
 		public String getFormattedValue(Object value) {
 			return crosstabData.getFormattedValue(value);
 		}
+		
+		public String getFormattedValue(Object value, NewRowEvent row) {
+			return crosstabData.getFormattedValue(value, row);
+		}
 
 		public Object getValue(NewRowEvent newRowEvent) {
 			return crosstabData.getValue(newRowEvent);
@@ -281,6 +291,14 @@ class IntermediateCrosstabReport extends AbstractOneIterationReport {
 
 		public HorizontalAlign getHorizAlign() {
 			return crosstabData.getHorizAlign(); 
+		}
+		
+		public ICrosstabData getCrosstabData() {
+			return crosstabData;
+		}
+		
+		public ICalculator getCalculator(NewRowEvent row) {
+			return crosstabData.getCalculator(row);
 		}
 	}
 	

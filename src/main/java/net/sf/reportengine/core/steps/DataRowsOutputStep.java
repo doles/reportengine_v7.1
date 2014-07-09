@@ -75,12 +75,12 @@ public class DataRowsOutputStep extends AbstractReportStep {
 		//then handle the data columns
 		for(IDataColumn dataColumn : dataColumns){
 			valueForCurrentColumn = dataColumn.getValue(newRowEvent);
-			cellPropsBuilder = new CellProps.Builder(dataColumn.getFormattedValue(valueForCurrentColumn));
+			cellPropsBuilder = new CellProps.Builder(dataColumn.getFormattedValue(valueForCurrentColumn,newRowEvent));
 			cellPropsBuilder.horizAlign(dataColumn.getHorizAlign());
 			output.output(cellPropsBuilder.build()); 
 		}
     	
 		//end row
-		output.endRow();
+		output.endRow(new RowProps(ReportContent.DATA));
     }
 }

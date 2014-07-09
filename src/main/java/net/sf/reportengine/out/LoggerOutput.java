@@ -27,7 +27,7 @@ public class LoggerOutput implements IReportOutput {
         dataToLog.delete(0, dataToLog.length());
 	}
 	
-	public void endRow(){
+	public void endRow(RowProps rowProperties){
 		logger.debug(dataToLog);
 	}
 	
@@ -38,5 +38,7 @@ public class LoggerOutput implements IReportOutput {
 	public void open() {}
 
 	public void close() {}
+	
+	public void write(Object string) {}
 
 }

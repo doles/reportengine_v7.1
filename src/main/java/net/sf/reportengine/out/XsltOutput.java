@@ -172,8 +172,8 @@ public class XsltOutput extends AbstractCharacterOutput {
     /**
      * 
      */
-    public void endRow(){
-    	staxReportOutput.endRow();
+    public void endRow(RowProps rowProperties){
+    	staxReportOutput.endRow(rowProperties);
     }
     
     /**
@@ -227,4 +227,6 @@ public class XsltOutput extends AbstractCharacterOutput {
 		}
 		return result; 
 	}
+	
+	public void write(Object string) {}
 }

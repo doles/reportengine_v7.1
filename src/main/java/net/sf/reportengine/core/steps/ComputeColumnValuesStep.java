@@ -4,6 +4,7 @@ import java.util.List;
 
 import net.sf.reportengine.config.IDataColumn;
 import net.sf.reportengine.config.IGroupColumn;
+import net.sf.reportengine.config.SecondProcessVarianceColumn;
 import net.sf.reportengine.core.AbstractReportStep;
 import net.sf.reportengine.core.algorithm.IReportContext;
 import net.sf.reportengine.core.algorithm.NewRowEvent;
@@ -61,6 +62,8 @@ public class ComputeColumnValuesStep extends AbstractReportStep{
 		
 		Object valueForCurrentColumn = null; 
 		
+		boolean groupChanged = true;
+		
 		//handle the grouping columns first
 		IGroupColumn currentGrpCol = null; 
 		for(int i=0; i<finalReportGroupCount; i++){
@@ -74,14 +77,18 @@ public class ComputeColumnValuesStep extends AbstractReportStep{
 				formattedResults[i] = currentGrpCol.getFormattedValue(valueForCurrentColumn);
 			}else{
 				formattedResults[i] = IReportOutput.WHITESPACE;
+				groupChanged = false;
 			}
 		}
 		
 		//then handle the data columns
 		for(int i=0; i<dataColumns.size(); i++){
+			if(dataColumns.get(i) instanceof SecondProcessVarianceColumn && groupChanged){
+				dataColumns.get(i).getCalculator().init();
+			}
 			valueForCurrentColumn = dataColumns.get(i).getValue(newRowEvent);
 			nonFormattedResults[finalReportGroupCount+i] = valueForCurrentColumn;
-			formattedResults[finalReportGroupCount+i] = dataColumns.get(i).getFormattedValue(valueForCurrentColumn);
+			formattedResults[finalReportGroupCount+i] = dataColumns.get(i).getFormattedValue(valueForCurrentColumn, newRowEvent);
 		}
 		
 		getContext().set(ContextKeys.CONTEXT_KEY_COMPUTED_CELL_VALUES, nonFormattedResults);

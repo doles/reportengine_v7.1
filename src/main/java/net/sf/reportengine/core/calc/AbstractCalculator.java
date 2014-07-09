@@ -3,6 +3,9 @@
  */
 package net.sf.reportengine.core.calc;
 
+import net.sf.reportengine.config.IDataColumn;
+import net.sf.reportengine.core.algorithm.NewRowEvent;
+
 /**
  * abstract implementation for ICalculator interface
  * 
@@ -30,4 +33,11 @@ public abstract class AbstractCalculator implements ICalculator {
 		}
 		return result; 
 	}
+	
+	
+	public void compute(IDataColumn column, NewRowEvent row){
+		Object value = column.getValue(row);
+		this.compute(value);
+	}
+	
 }

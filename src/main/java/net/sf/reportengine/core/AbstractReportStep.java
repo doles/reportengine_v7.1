@@ -183,6 +183,10 @@ public abstract class AbstractReportStep extends AbstractAlgorithmStep{
 		
     		Object[] prevDataRow = getPreviousRowOfGroupingValues(); 
     		if(prevDataRow != null){
+    			//if this is crosstab data return
+    			if(prevDataRow.length < from){
+    				return result;
+    			}
     			for(int i=from; i < groupingLevel+1; i++){
     				result[i-from] = prevDataRow[i];
     			}

@@ -43,7 +43,7 @@ public class ArrayReportInput extends AbstractReportInput {
 	/* (non-Javadoc)
 	 * @see net.sf.reportengine.in.AbstractReportInput#hasMoreRows()
 	 */
-	@Override
+	//@Override
 	public boolean hasMoreRows() {
 		return currentRow < data.length ;
 	}
@@ -51,7 +51,7 @@ public class ArrayReportInput extends AbstractReportInput {
 	/* (non-Javadoc)
 	 * @see net.sf.reportengine.in.AbstractReportInput#nextRow()
 	 */
-	@Override
+	//@Override
 	public Object[] nextRow(){
 		return data[currentRow++];
 	}

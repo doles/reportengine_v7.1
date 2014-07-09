@@ -73,7 +73,7 @@ public class ColumnHeaderOutputInitStep implements IAlgorithmInitStep{
             									.horizAlign(HorizontalAlign.CENTER)
             									.build();
             output.output(titleCellProps);
-            output.endRow();
+            output.endRow(new RowProps(ReportContent.REPORT_TITLE));
         }
         
         //output the report column headers
@@ -98,6 +98,6 @@ public class ColumnHeaderOutputInitStep implements IAlgorithmInitStep{
             output.output(cellProps);
         }
         
-        output.endRow();
+        output.endRow(new RowProps(ReportContent.REPORT_TITLE));
     }
 }

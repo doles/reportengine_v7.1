@@ -24,6 +24,8 @@ public class SecondProcessTotalColumn extends AbstractDataColumn {
 	 */
 	private int[] positionRelativeToHeader; 
 	
+	private int crosstabDataIndex;
+	
 	/**
 	 * 
 	 * @param header
@@ -33,9 +35,10 @@ public class SecondProcessTotalColumn extends AbstractDataColumn {
 	public SecondProcessTotalColumn(int[] positionRelativeToHeader, 
 									ICalculator calc,
 									Format formatter, 
-									String debugHeader) {
+									String debugHeader, int crosstabDataIndex) {
 		super(debugHeader +" "+Arrays.toString(positionRelativeToHeader), calc, formatter);
 		this.positionRelativeToHeader = positionRelativeToHeader; 
+		this.crosstabDataIndex = crosstabDataIndex;
 	}
 
 	/* (non-Javadoc)
@@ -46,7 +49,7 @@ public class SecondProcessTotalColumn extends AbstractDataColumn {
 		//instance of IntermCtDataList
 		Object[] newRow = newRowEvent.getInputDataRow(); 
 		IntermComputedTotalsList intermTotalsList = (IntermComputedTotalsList)newRow[3]; 
-		Object result = intermTotalsList.getValueFor(positionRelativeToHeader); 
+		Object result = intermTotalsList.getValueFor(positionRelativeToHeader, crosstabDataIndex); 
 		Object toReturn = BigDecimal.ZERO; 
 		if(result != null ){
 			toReturn = result; 

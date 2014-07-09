@@ -80,7 +80,7 @@ public abstract class AbstractOutput implements IReportOutput {
     /**
      * empty implementation
      */
-    public void endRow(){}
+    public void endRow(RowProps rowProperties){}
     
     /**
      * checks null & other impossible to print values

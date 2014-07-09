@@ -106,4 +106,6 @@ public class TextOutput extends AbstractCharacterOutput{
 	public void setSeparator(String separator) {
 		this.separator = separator;
 	}
+	
+	public void write(Object string) {}
 }

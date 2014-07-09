@@ -24,6 +24,13 @@ public class IntermComputedTotalsList implements Serializable{
 	 */
 	private static final long serialVersionUID = 3388048740067218435L;
 	
+	private int crosstabSize;
+	
+	public IntermComputedTotalsList(int crosstabSize){
+		this.crosstabSize = crosstabSize;
+		this.totalsDataList = new ArrayList<IntermediateTotalInfo>(); 
+	}
+	
 	/**
 	 * the total values holder
 	 */
@@ -50,7 +57,7 @@ public class IntermComputedTotalsList implements Serializable{
 	 * @param position	an array of indexes ( position relative to header)
 	 * @return
 	 */
-	public Object getValueFor(int...position){
+	public Object getValueFor(int[] position, int crosstabDataIndex){
 		Object result = null; 
 		boolean allPositionsAreEqual =  true; 
 		
@@ -78,7 +85,7 @@ public class IntermComputedTotalsList implements Serializable{
 					if(allPositionsAreEqual){
 						//the first time we find that all positions are equal we exit the 
 						//dataInfo loop and return
-						result = totalInfo.getComputedValue(); 
+						result = totalInfo.getComputedValues()[crosstabDataIndex]; 
 						break; 
 					}
 				}else{
@@ -87,12 +94,14 @@ public class IntermComputedTotalsList implements Serializable{
 				}
 			}//end loop totalsInfo 
 		}else{
-			for (IntermediateTotalInfo totalInfo : totalsDataList) {
-				if(totalInfo.getPositionRelativeToHeader() == null){
-					result = totalInfo.getComputedValue(); 
-					break; 
-				}
-			}
+			//we know the last columns are crosstab grand total columns
+			/*int totalsForAllColsIndex = totalsDataList.size()-1;
+			//the total we need it fullIndex - crosstabDataIndex 
+			IntermediateTotalInfo totalInfo = totalsDataList.get(totalsForAllColsIndex-(crosstabSize-1)+crosstabDataIndex);
+			result = totalInfo.getComputedValues()[crosstabDataIndex];
+			*/
+			IntermediateTotalInfo totalInfo = totalsDataList.get(totalsDataList.size()-1);
+			result = totalInfo.getComputedValues()[crosstabDataIndex];
 		}
 		return result;
 	}

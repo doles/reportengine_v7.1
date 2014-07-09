@@ -225,4 +225,6 @@ public class ExcelOutput extends AbstractByteOutput {
     public int getCurrentCol(){
         return currentCol;
     }
+    
+    public void write(Object string) {}
 }

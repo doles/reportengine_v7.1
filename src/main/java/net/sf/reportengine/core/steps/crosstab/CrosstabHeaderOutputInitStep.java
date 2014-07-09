@@ -11,15 +11,19 @@ import net.sf.reportengine.config.IGroupColumn;
 import net.sf.reportengine.config.SecondProcessDataColumn;
 import net.sf.reportengine.config.SecondProcessDataColumnFromOriginalDataColumn;
 import net.sf.reportengine.config.SecondProcessTotalColumn;
+import net.sf.reportengine.config.SecondProcessVarianceColumn;
+import net.sf.reportengine.config.VarianceDataColumn;
 import net.sf.reportengine.core.ReportContent;
 import net.sf.reportengine.core.algorithm.IReportContext;
 import net.sf.reportengine.core.algorithm.steps.IAlgorithmInitStep;
+import net.sf.reportengine.core.steps.FlatReportTotalsOutputStep;
 import net.sf.reportengine.out.CellProps;
 import net.sf.reportengine.out.IReportOutput;
 import net.sf.reportengine.out.RowProps;
 import net.sf.reportengine.util.ContextKeys;
 import net.sf.reportengine.util.CtMetadata;
 
+import org.apache.bcel.generic.INSTANCEOF;
 import org.apache.log4j.Logger;
 
 /**
@@ -97,14 +101,21 @@ public class CrosstabHeaderOutputInitStep implements IAlgorithmInitStep {
 																reportOutput,
 																isLastHeaderRow);
 							currentColumn++; 
-						}else{
+						}
+						else if(currentDataColumn instanceof SecondProcessVarianceColumn){
+							displayHeaderForOriginalDataColumn(	currentDataColumn, 
+									reportOutput,
+									isLastHeaderRow);
+							currentColumn++;
+						}
+						else{
 							//no other type of data column is accepted
 							throw new IllegalArgumentException("there's no handler for "+currentDataColumn.getClass());
 						}
 					}
 				}
 			}//end while 
-			reportOutput.endRow(); 
+			reportOutput.endRow(new RowProps(ReportContent.COLUMN_HEADER)); 
 		}
 	}
 
@@ -150,13 +161,21 @@ public class CrosstabHeaderOutputInitStep implements IAlgorithmInitStep {
 														IReportOutput reportOutput,
 														boolean isLastHeaderRow) {
 		//only on the last header row we display the header values for the original data columns
-		if(isLastHeaderRow){
+		if(isLastHeaderRow && currentDataColumn instanceof SecondProcessDataColumnFromOriginalDataColumn){
 			SecondProcessDataColumnFromOriginalDataColumn originalDataColumn = (SecondProcessDataColumnFromOriginalDataColumn)currentDataColumn; 
 			reportOutput.output(new CellProps.Builder(originalDataColumn.getHeader())
 											.colspan(1)
 											.contentType(ReportContent.COLUMN_HEADER)
 											.horizAlign(HorizontalAlign.CENTER)
 											.build()); 
+		}
+		else if(isLastHeaderRow && currentDataColumn instanceof SecondProcessVarianceColumn){
+			SecondProcessVarianceColumn varianceDataCol = (SecondProcessVarianceColumn)currentDataColumn;
+				reportOutput.output(new CellProps.Builder(varianceDataCol.getHeader())
+				.colspan(1)
+				.contentType(ReportContent.COLUMN_HEADER)
+				.horizAlign(HorizontalAlign.CENTER)
+				.build()); 
 		}else{
 			//first header rows will contain empty cells
 			reportOutput.output(CellProps.EMPTY_CELL);
@@ -199,7 +218,7 @@ public class CrosstabHeaderOutputInitStep implements IAlgorithmInitStep {
 		}else{
 			//the only data column that has null positions is the grand total column
 			if(currHeaderRow == 0){
-				reportOutput.output(new CellProps.Builder("Grand Total")
+				reportOutput.output(new CellProps.Builder(FlatReportTotalsOutputStep.GRAND_TOTAL_STRING)
 											.contentType(ReportContent.COLUMN_HEADER)
 											.horizAlign(HorizontalAlign.LEFT)
 											.build());
@@ -228,7 +247,7 @@ public class CrosstabHeaderOutputInitStep implements IAlgorithmInitStep {
 		int colspan = 1;
 		if(!isLastHeaderRow){
 			//for all rows except the last header row we read the colspan
-			colspan = ctMetadata.getColspanForLevel(ctMetadata.getHeaderRowsCount()-2);
+			colspan = ctMetadata.getColspanForLevel(currHeaderRow);//(ctMetadata.getHeaderRowsCount()-2);
 		}
 		
 		Object value = ctMetadata.getDistincValueFor(currHeaderRow, secondProcDataColumn.getPosition()[currHeaderRow]);

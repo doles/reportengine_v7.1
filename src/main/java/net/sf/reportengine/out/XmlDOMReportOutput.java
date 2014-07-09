@@ -99,8 +99,8 @@ public class XmlDOMReportOutput extends AbstractXmlOutput {
     /**
      * end up a line
      */
-    public void endRow(){
-        super.endRow();
+    public void endRow(RowProps rowProperties){
+        super.endRow(rowProperties);
         if (rowElement != null) {
             root.appendChild(rowElement);
         }else{
@@ -167,4 +167,6 @@ public class XmlDOMReportOutput extends AbstractXmlOutput {
     	Result result = new StreamResult(getOutputWriter());
     	transformer.transform(source, result);         
     }
+    
+    public void write(Object string) {}
 }

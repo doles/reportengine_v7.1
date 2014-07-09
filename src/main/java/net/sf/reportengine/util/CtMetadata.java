@@ -6,6 +6,9 @@ package net.sf.reportengine.util;
 import java.util.Arrays;
 import java.util.List;
 
+import net.sf.reportengine.config.ICrosstabData;
+import net.sf.reportengine.core.steps.crosstab.CrosstabDistinctValuesDetectorStep;
+
 /**
  * @author dragos balan
  * @since 0.4
@@ -38,6 +41,8 @@ public class CtMetadata {
 	
 	public void computeCoefficients(){
 		
+		
+		
 		//first we compute the number of columns
 		dataColumnsCount = 1; 
 		headerRowsCount = distinctValuesHolder.getRowsCount();
@@ -65,6 +70,7 @@ public class CtMetadata {
 			
 			spanWhenTotalsPerLevel[headerRowsCount-i-1] = (auxDistinctValues * spanWhenTotalsPerLevel[headerRowsCount-i]) + 1;
 		}
+		//step 2 
 	}
 	
 	public int getDataColumnCount(){

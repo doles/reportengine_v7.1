@@ -19,10 +19,12 @@ public class CellPropsArrayOutput implements IReportOutput {
 	
 	private ArrayList<CellProps[]> cellMatrix;
 	private ArrayList<CellProps> currentRowOfCells;
+	private ArrayList<RowProps> rowProps;
 	
 	
 	public CellPropsArrayOutput(){
 		this.cellMatrix = new ArrayList<CellProps[]>();
+		this.rowProps = new ArrayList<RowProps>();
 	}
 	
 	public void output(CellProps cellProps) {
@@ -31,9 +33,10 @@ public class CellPropsArrayOutput implements IReportOutput {
 	
 	public void startRow(RowProps rowProperties){
 		currentRowOfCells = new ArrayList<CellProps>();
+		rowProps.add(rowProperties);
 	}
 	
-	public void endRow(){
+	public void endRow(RowProps rowProperties){
 		CellProps[] completeRow = currentRowOfCells.toArray(new CellProps[currentRowOfCells.size()]);
 		cellMatrix.add(completeRow);
 	}
@@ -45,8 +48,14 @@ public class CellPropsArrayOutput implements IReportOutput {
 		}
 		return result;
 	}
+	
+	public ArrayList<RowProps> getRowProps() {
+		return rowProps;
+	}
 
 	public void open() {}
 
 	public void close() {}
+	
+	public void write(Object string) {}
 }

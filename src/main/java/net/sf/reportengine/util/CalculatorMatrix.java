@@ -167,7 +167,7 @@ public class CalculatorMatrix {
     public void addValuesToEachRow(NewRowEvent newRowEvent){
     	for(int i= 0; i < calculators.length; i++){
             for(int j = 0; j < calculators[i].length; j++){
-                calculators[i][j].compute(dataColumnsHavingCalculators[j].getValue(newRowEvent));
+                calculators[i][j].compute(dataColumnsHavingCalculators[j],newRowEvent);
             }
         }
     }

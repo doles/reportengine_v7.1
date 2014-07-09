@@ -3,10 +3,10 @@
  */
 package net.sf.reportengine.util;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import net.sf.reportengine.config.ICrosstabData;
 import net.sf.reportengine.config.ICrosstabHeaderRow;
 
 /**
@@ -37,19 +37,11 @@ public class DistinctValuesHolder implements IDistinctValuesHolder{
 	/**
 	 * 
 	 * @param headerRows
-	 * @deprecated
-	 */
-	public DistinctValuesHolder(ICrosstabHeaderRow[] headerRows){
-		this(Arrays.asList(headerRows)); 
-	}
-	
-	/**
-	 * 
-	 * @param headerRows
 	 */
 	public DistinctValuesHolder(List<ICrosstabHeaderRow> headerRows){
-		distinctValuesMap = new HashMap<Integer, DistinctValuesRow>(headerRows.size()); 
-		for (int i = 0; i < headerRows.size(); i++) {
+		//1 is for metrics label
+		distinctValuesMap = new HashMap<Integer, DistinctValuesRow>(headerRows.size()+1); 
+		for (int i = 0; i < headerRows.size()+1; i++) {
 			distinctValuesMap.put(i, new DistinctValuesRow());
 		}
 	}

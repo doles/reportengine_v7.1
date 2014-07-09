@@ -3,6 +3,9 @@
  */
 package net.sf.reportengine.core.steps.crosstab;
 
+import java.util.List;
+
+import net.sf.reportengine.config.ICrosstabData;
 import net.sf.reportengine.core.ReportContent;
 import net.sf.reportengine.core.algorithm.IReportContext;
 import net.sf.reportengine.core.algorithm.NewRowEvent;
@@ -36,7 +39,7 @@ public class IntermediateCrosstabRowMangerStep extends AbstractCrosstabStep {
 	 * The array is refreshed only when the grouping level is changed
 	 *
 	 */
-	private IntermediateReportRow intermediateRow = new IntermediateReportRow(); 
+	private IntermediateReportRow intermediateRow;
 	
 	
 	/**
@@ -44,6 +47,8 @@ public class IntermediateCrosstabRowMangerStep extends AbstractCrosstabStep {
 	 */
 	public void init(IReportContext context){
 		super.init(context);
+		List<ICrosstabData> crosstabData = (List<ICrosstabData>)getContext().get(ContextKeys.CONTEXT_KEY_CROSSTAB_DATA);
+		intermediateRow = new IntermediateReportRow(crosstabData.size()); 
 		context.set(ContextKeys.CONTEXT_KEY_INTERMEDIATE_ROW, intermediateRow);
 	}
 	
@@ -53,7 +58,7 @@ public class IntermediateCrosstabRowMangerStep extends AbstractCrosstabStep {
 	 */
 	@Override
 	public void execute(NewRowEvent rowEvent) {
-		IntermediateDataInfo currentCrosstabDataInfo = getIntermediateCrosstabDataInfo(); 
+		IntermediateDataInfo[] currentCrosstabDataInfo = getIntermediateCrosstabDataInfo(); 
 		int groupingLevel = getGroupingLevel(); 
 		int originalGroupColsLength = getOriginalCrosstabGroupingColsLength();
 		int originalDataColsLength = getOriginalCrosstabDataColsLength(); 
@@ -68,9 +73,8 @@ public class IntermediateCrosstabRowMangerStep extends AbstractCrosstabStep {
 				
 				//First we update all remaining totals (if the report contains totals)
 				if(getShowTotals() || getShowGrandTotal()){
-					//we don't need all totals. From the groupingColumns we take only the first one
-					updateIntermediateTotals(	originalGroupColsLength+originalDataColsLength-1, 
-												getGroupingColumnsLength() , 
+					updateIntermediateTotals(	originalGroupColsLength+originalDataColsLength-1, //me:0,
+												getGroupingColumnsLength(), //me:originalGroupColsLength+originalDataColsLength+1,//
 												calculatorMatrix);
 				}
 				//Second: we display the intermediate row
@@ -84,7 +88,7 @@ public class IntermediateCrosstabRowMangerStep extends AbstractCrosstabStep {
 				
 				if(getShowTotals()||getShowGrandTotal()){
 					updateIntermediateTotals(	groupingLevel, 				//from the current grouping level 
-												getGroupingColumnsLength(), //to the last intermediate grouping col
+												getGroupingColumnsLength(),//+getCrosstabData().size(), //to the last intermediate grouping col
 												calculatorMatrix);
 				}
 			}
@@ -117,24 +121,43 @@ public class IntermediateCrosstabRowMangerStep extends AbstractCrosstabStep {
 	}
 	
 	
-	private void updateIntermediateTotals(	int levelFrom, 
+	private void updateIntermediateTotals(	//grouping level
+											int levelFrom, 
+											//grouping columns (if change in groups/data = groups+data, but if in header then groups+data+headers+crosstab data)
 											int levelTo, 
 											ICalculator[][] calculatorMatrix){
 		int calculatorMatrixRow = -1;
-		Object calculatorResult = null; 
-		int tmpLevelFrom = getOriginalCrosstabGroupingColsLength()+ getOriginalCrosstabDataColsLength(); 
+		Object[] calculatorResult = null;
+		int tmpLevelFrom = getOriginalCrosstabGroupingColsLength()+ getOriginalCrosstabDataColsLength()+1; 
+		//me:int tmpLevelFrom = getOriginalCrosstabGroupingColsLength() + getOriginalCrosstabDataColsLength() + getCrosstabData().size(); 
 		for (int tempGrpLevel = levelFrom; tempGrpLevel < levelTo; tempGrpLevel++) {
-			calculatorMatrixRow = computeCalcRowNumberForAggLevel(tempGrpLevel); //getGroupingColumnsLength() - tempGrpLevel -1; 
+			calculatorMatrixRow = tmpLevelFrom - tempGrpLevel - 1; //getGroupingColumnsLength() - tempGrpLevel -1; 
 			Object[] totalStrings = getTotalStringForGroupingLevelAndPredecessors(tmpLevelFrom, tempGrpLevel);
 			int[] position = getPositionOfTotal(tmpLevelFrom, tempGrpLevel);
 			
-			//our intermediate report has only one column containing calculators 
-			//(the column containing crosstab data) therefore we have only one column 
-			//in the calculator matrix (see the zero below)
-			calculatorResult = calculatorMatrix[calculatorMatrixRow][0].getResult(); 
+			if(null==calculatorResult){
+				calculatorResult = new Object[getCrosstabData().size()];
+			}
+			for(int c = 0; c<getCrosstabData().size();c++){
+				calculatorResult[c] = calculatorMatrix[calculatorMatrixRow][c].getResult(); 
+			}
+			
 			intermediateRow.addIntermTotalsInfo(new IntermediateTotalInfo(	calculatorResult, 
 																			position, 
 																			totalStrings));
+			
+			//last three are for crosstab grand total data cells
+			Object[] calculatorResultGrandTotal = new Object[getCrosstabData().size()];
+			int crosstabDataLength = getCrosstabData().size()-1;
+			for(int c = 0; c<=crosstabDataLength;c++){
+				int calculatorMatrixRowCt = (calculatorMatrix.length-1)-crosstabDataLength+c;
+				calculatorResultGrandTotal[c] = calculatorMatrix[calculatorMatrixRowCt][c].getResult(); 
+			}
+			intermediateRow.addIntermTotalsInfo(new IntermediateTotalInfo(	calculatorResultGrandTotal, 
+					null, 
+					null));
+			
+			
 		}
 	}
 	
@@ -152,11 +175,19 @@ public class IntermediateCrosstabRowMangerStep extends AbstractCrosstabStep {
 		//because they are further needed in the second iteration
 		for (int i=0; i<originalGroupingValuesLength; i++) {
 			//only for debug output.output(new CellProps(previousGroupValues[i]));
-			intermediateRow.addOrigGroupValue(previousGroupValues[i]);
+			if(null==previousGroupValues){
+				intermediateRow.addOrigGroupValue(null);
+			}
+			else {
+				intermediateRow.addOrigGroupValue(previousGroupValues[i]);
+			}
 		}
 		logger.debug("second: adding "+originalDataValuesLength+" data values to intermediate row");
 		for(int i=0; i<originalDataValuesLength; i++){
-			Object prevValue = previousGroupValues[originalGroupingValuesLength+i];
+			Object prevValue = null;
+			if(null!=previousGroupValues){
+				prevValue = previousGroupValues[originalGroupingValuesLength+i];
+			}
 			intermediateRow.addOrigDataColValue(prevValue);
 		}
 		
@@ -191,7 +222,7 @@ public class IntermediateCrosstabRowMangerStep extends AbstractCrosstabStep {
 		output.output(new CellProps.Builder(intermediateRow)
 							.colspan(4) /*this is not taken into account except when debug*/
 							.build()); 
-		output.endRow(); 
+		output.endRow(new RowProps(ReportContent.DATA)); 
 	}
 	
 //	private void flushObjectOutputStream(){

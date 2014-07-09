@@ -60,7 +60,7 @@ public class IntermediateCrosstabOutput implements IReportOutput {
 	/* (non-Javadoc)
 	 * @see net.sf.reportengine.out.IReportOutput#endRow()
 	 */
-	public void endRow() {
+	public void endRow(RowProps rowProperties) {
 		try {
 			objectOutputStream.reset();
 		} catch (IOException e) {
@@ -109,4 +109,6 @@ public class IntermediateCrosstabOutput implements IReportOutput {
 	public File getSerializedOutputFile(){
 		return result; 
 	}
+	
+	public void write(Object string) {}
 }

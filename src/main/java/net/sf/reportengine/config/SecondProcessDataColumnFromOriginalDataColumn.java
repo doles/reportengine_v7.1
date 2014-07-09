@@ -64,4 +64,12 @@ public class SecondProcessDataColumnFromOriginalDataColumn implements IDataColum
 	public HorizontalAlign getHorizAlign() {
 		return originalDataColumn.getHorizAlign(); 
 	}
+	
+	public String getFormattedValue(Object value, NewRowEvent row) {
+		return getFormattedValue(value);
+	}
+	
+	public ICalculator getCalculator(NewRowEvent row) {
+		return originalDataColumn.getCalculator(row);
+	}
 }

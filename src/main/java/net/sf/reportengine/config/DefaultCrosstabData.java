@@ -19,7 +19,7 @@ public class DefaultCrosstabData extends AbstractCrosstabData {
 	/**
 	 * 
 	 */
-	private int inputColumnIndex; 
+	private int inputColumnIndex;
 	
 	
 	/**

@@ -6,6 +6,9 @@ package net.sf.reportengine.core.calc;
 
 import java.io.Serializable;
 
+import net.sf.reportengine.config.IDataColumn;
+import net.sf.reportengine.core.algorithm.NewRowEvent;
+
 /**
  * <p>
  *  Definition interface for any calculator
@@ -29,6 +32,9 @@ public interface ICalculator extends Serializable, Cloneable {
      * @param value    an object representing a new value to be computed
      */
     public void compute(Object value);
+    
+    
+    public void compute(IDataColumn column, NewRowEvent row);
     
     /**
      * the result of computation

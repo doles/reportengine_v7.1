@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import net.sf.reportengine.config.IDataColumn;
+import net.sf.reportengine.core.algorithm.NewRowEvent;
+
 /**
  * this class holds values computed by the intermediate report (coming from CrosstabData) and arranged as a single object
  * in the intermediate row
@@ -28,21 +31,21 @@ public class IntermComputedDataList implements Serializable{
 	/**
 	 * the values list
 	 */
-	private List<IntermediateDataInfo> dataList; 
+	private List<IntermediateDataInfo[]> dataList; 
 	
 	
 	/**
 	 * the one and only constructor
 	 */
 	public IntermComputedDataList(){
-		dataList = new ArrayList<IntermediateDataInfo>();
+		dataList = new ArrayList<IntermediateDataInfo[]>();
 	}
 	
 	/**
 	 * adds the specified data into the list
 	 * @param info
 	 */
-	public void addData(IntermediateDataInfo info){
+	public void addData(IntermediateDataInfo[] info){
 		dataList.add(info);
 	}
 	
@@ -50,7 +53,7 @@ public class IntermComputedDataList implements Serializable{
 	 * returns the data list
 	 * @return
 	 */
-	public List<IntermediateDataInfo> getDataList(){
+	public List<IntermediateDataInfo[]> getDataList(){
 		return dataList; 
 	}
 	
@@ -67,42 +70,83 @@ public class IntermComputedDataList implements Serializable{
 	 * @param headerRowIndex	the position relative to header
 	 * @return
 	 */
-	public Object getValueFor(int...headerRowIndex){
+	public Object getValueFor(int[] headerRowIndex, IDataColumn dataColumn){
 		Object result = null; 
+		List<NewRowEvent> values = new ArrayList<NewRowEvent>(1);
 		boolean allPositionsAreEqual =  true; 
 		
 		//iterate over dataList
-		for (IntermediateDataInfo dataInfo : dataList) {
-			int[] positionRelativeToHeader = dataInfo.getPositionRelativeToHeaderRows();
-			if(	positionRelativeToHeader != null 
-				&& positionRelativeToHeader.length == headerRowIndex.length){
-				
-				allPositionsAreEqual =  true; 
-				
-				//iterate over positions
-				for (int i = 0; i < positionRelativeToHeader.length && allPositionsAreEqual; i++) {
-					if(positionRelativeToHeader[i] != headerRowIndex[i]){
+		if(headerRowIndex!=null) {
+			for (IntermediateDataInfo[] dataInfos : dataList) {
+				for(IntermediateDataInfo dataInfo : dataInfos){
+					int[] positionRelativeToHeader  = dataInfo.getPositionRelativeToHeaderRows();
+					if(	positionRelativeToHeader != null 
+						&& positionRelativeToHeader.length == headerRowIndex.length){ //last one are metrics
 						
-						//if found one position not equal to the header row index then 
-						//mark not all positions are equal in order to skip this 
-						//IntermediateDataInfo and pass to the next one
-						allPositionsAreEqual = false; 
+						allPositionsAreEqual =  true; 
+						
+						//iterate over positions
+						for (int i = 0; i < positionRelativeToHeader.length && allPositionsAreEqual; i++) {
+							if(positionRelativeToHeader[i] != headerRowIndex[i]){
+								
+								//if found one position not equal to the header row index then 
+								//mark not all positions are equal in order to skip this 
+								//IntermediateDataInfo and pass to the next one
+								allPositionsAreEqual = false; 
+							}
+						}
+						
+						if(allPositionsAreEqual){
+							//the first time we find that all positions are equal we exit the 
+							//dataInfo loop and return
+							
+							//last number in headerRowIndex point to index of the value
+							//int valueIndex = headerRowIndex[headerRowIndex.length-1];
+							values.add(dataInfo.getRow());
+						}
+					}else{
+						throw new IllegalArgumentException("Invalid position array : "+Arrays.toString(headerRowIndex));
 					}
 				}
-				
-				if(allPositionsAreEqual){
-					//the first time we find that all positions are equal we exit the 
-					//dataInfo loop and return
-					result = dataInfo.getValue(); 
-					break; 
+	
+			}
+			
+			dataColumn.getCalculator().init();
+			for(NewRowEvent value : values){
+				if(null!=dataColumn){
+					dataColumn.getCalculator(value).init();
+					System.out.println("Clearing value: "+dataColumn.getCalculator(value).getResult());
 				}
-			}else{
-				throw new IllegalArgumentException("Invalid position array : "+Arrays.toString(headerRowIndex));
+			}
+			for(NewRowEvent value : values){
+				if(null!=dataColumn){
+					dataColumn.getCalculator(value).compute(dataColumn, value);
+					result = dataColumn.getCalculator(value).getResult();
+				}
 			}
 		}
+		else {
+			dataColumn.getCalculator().init();
+			for(IntermediateDataInfo[] dataInfos : dataList){
+				for(IntermediateDataInfo dataInfo : dataInfos){					
+					dataColumn.getCalculator(dataInfo.getRow()).init();	
+					System.out.println("Clearing value: "+dataColumn.getCalculator(dataInfo.getRow()).getResult());
+				}
+			}
+			for(IntermediateDataInfo[] dataInfos : dataList){
+				for(IntermediateDataInfo dataInfo : dataInfos){					
+					dataColumn.getCalculator(dataInfo.getRow()).compute(dataColumn, dataInfo.getRow());
+					result = dataColumn.getCalculator(dataInfo.getRow()).getResult();					
+				}
+			}			
+		}
+		
+		
+		
 		return result;
 	}
 	
+		
 	@Override
 	public boolean equals(Object another){
 		boolean result = false;

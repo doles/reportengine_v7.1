@@ -47,7 +47,7 @@ public final class CellProps {
 	 * 
 	 * @param propsBuilder
 	 */
-	private CellProps(Builder propsBuilder){
+	public CellProps(Builder propsBuilder){
 		this.value = propsBuilder.value; 
 		this.colspan = propsBuilder.colspan; 
 		this.content = propsBuilder.content; 
@@ -61,6 +61,8 @@ public final class CellProps {
 	public int getColspan() {
 		return colspan;
 	}
+	
+	
 	
 	/**
 	 * the content type
@@ -142,6 +144,13 @@ public final class CellProps {
 		
 		public Builder(Object value){
 			this.value = value; 
+		}
+		
+		public Builder(Object value, int colspan, ReportContent content, HorizontalAlign align){
+			this.value = value;
+			this.colspan = colspan;
+			this.content = content;
+			this.horizAlign =align;
 		}
 		
 		public Builder colspan(int colspan){

@@ -33,6 +33,9 @@ public interface IDataColumn{
 	public String getFormattedValue(Object value);
 	
 	
+	public String getFormattedValue(Object value, NewRowEvent row);	
+	
+	
 	/**
 	 * retrieves the value for this column. 
 	 * This is the most important method as it retrieves the data for the row-column combination. 
@@ -54,5 +57,12 @@ public interface IDataColumn{
 	 * returns the horizontal alignment to be used for this column
 	 */
 	public HorizontalAlign getHorizAlign();
+	
+	
+	/*
+	 * Extra features
+	 */
+	
+	public ICalculator getCalculator(NewRowEvent row);
 	
 }

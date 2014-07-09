@@ -1,8 +1,12 @@
 package net.sf.reportengine.config;
 
 import java.text.Format;
+import java.util.ArrayList;
+import java.util.Map;
 
+import net.sf.reportengine.core.algorithm.NewRowEvent;
 import net.sf.reportengine.core.calc.ICalculator;
+import net.sf.reportengine.core.steps.crosstab.IntermOriginalGroupValuesList;
 
 /**
  * Abstract implementation for IDataColumn. 
@@ -32,6 +36,11 @@ public abstract class AbstractDataColumn implements IDataColumn {
 	 * the horizontal alignment
 	 */
 	private HorizontalAlign horizAlign; 
+	
+
+	private int formatterKeyRowIndex;
+	
+	private int calculatorKeyRowIndex;
 	
 	/**
 	 * 
@@ -110,10 +119,37 @@ public abstract class AbstractDataColumn implements IDataColumn {
 		return result; 
 	}
 	
+	public String getFormattedValue(Object unformattedValue, NewRowEvent row){
+		String result = "";
+		if(unformattedValue != null){
+			if(formatters != null){
+				Object key = row.getInputDataRow()[0];
+				Format f = null;
+				if(key instanceof IntermOriginalGroupValuesList){
+					//this is crosstab group, so get key from group, groups will be at the begining
+					f = formatters.get(((IntermOriginalGroupValuesList) key).getGroupValues().get(0));
+				}
+				else {
+					f = formatters.get(row.getInputDataRow()[formatterKeyRowIndex]);	
+				}
+				
+				if(f==null){
+					result = getFormattedValue(unformattedValue);
+				}
+				else {
+					result = f.format(unformattedValue);	
+				}
+			}else{
+				result = getFormattedValue(unformattedValue);
+			}
+		}
+		return result; 		
+	}
+	
 	/**
 	 * getter for this column's calculator (if any)
 	 */
-	public ICalculator getCalculator() {
+	public ICalculator getCalculator() {		
 		return calculator;
 	}
 	
@@ -157,5 +193,56 @@ public abstract class AbstractDataColumn implements IDataColumn {
 	 */
 	public void setHorizAlign(HorizontalAlign horizAlign) {
 		this.horizAlign = horizAlign;
+	}
+	
+	private Map<String,Format> formatters;
+	
+	public void setFormatters(Map<String, Format> formatters) {
+		this.formatters = formatters;
+	}
+	
+	public Map<String, Format> getFormatters() {
+		return formatters;
+	}	
+	
+	
+	public int getFormatterKeyRowIndex() {
+		return formatterKeyRowIndex;
+	}
+	
+	public void setFormatterKeyRowIndex(int formatterKeyRowIndex) {
+		this.formatterKeyRowIndex = formatterKeyRowIndex;
+	}
+	
+	private Map<String,ICalculator> calculators;
+	
+	
+	public Map<String, ICalculator> getCalculators() {
+		return calculators;
+	}
+	
+	public void setCalculators(Map<String, ICalculator> calculators) {
+		this.calculators = calculators;
+	}
+	
+	public int getCalculatorKeyRowIndex() {
+		return calculatorKeyRowIndex;
+	}
+	
+	public void setCalculatorKeyRowIndex(int calculatorKeyRowIndex) {
+		this.calculatorKeyRowIndex = calculatorKeyRowIndex;
+	}
+	
+	public ICalculator getCalculator(NewRowEvent row) {
+		if(calculators != null){
+			ICalculator c = calculators.get(row.getInputDataRow()[calculatorKeyRowIndex]);
+			if(c==null){
+				return getCalculator();
+			}
+			else {
+				return c;
+			}
+		}		
+		return getCalculator();
 	}
 }

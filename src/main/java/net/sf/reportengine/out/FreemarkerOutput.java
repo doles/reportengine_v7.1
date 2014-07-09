@@ -262,4 +262,6 @@ public class FreemarkerOutput extends AbstractCharacterOutput {
 	public void setFreemarkerConfig(Configuration freemarkerConfig) {
 		this.freemarkerConfig = freemarkerConfig;
 	}
+	
+	public void write(Object string) {}
 }

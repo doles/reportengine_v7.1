@@ -40,11 +40,11 @@ public class IntermediateReportRow implements Serializable {
 	/**
 	 * the one and only constructor
 	 */
-	public IntermediateReportRow(){
+	public IntermediateReportRow(int crostabDataSize){
 		intermOrigGroupValuesList = new IntermOriginalGroupValuesList();
 		intermOriginalDataValues = new IntermOriginalDataColsList(); 
 		intermComputedDataList = new IntermComputedDataList();
-		intermComputedTotalsList = new IntermComputedTotalsList();
+		intermComputedTotalsList = new IntermComputedTotalsList(crostabDataSize);
 	}
 	
 	public IntermOriginalGroupValuesList getIntermGroupValuesList(){
@@ -84,7 +84,7 @@ public class IntermediateReportRow implements Serializable {
 	 * adds the given DataInfo to the existing intermediate data list
 	 * @param info
 	 */
-	public void addIntermComputedData(IntermediateDataInfo info){
+	public void addIntermComputedData(IntermediateDataInfo[] info){
 		this.intermComputedDataList.addData(info);
 	}
 	

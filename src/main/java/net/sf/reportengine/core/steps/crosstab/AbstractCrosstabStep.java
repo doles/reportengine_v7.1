@@ -47,8 +47,8 @@ public abstract class AbstractCrosstabStep extends AbstractReportStep {
 		 return getCrosstabHeaderRows().size();
 	 }
 		
-	 public ICrosstabData getCrosstabData(){
-		 return (ICrosstabData)getContext().get(ContextKeys.CONTEXT_KEY_CROSSTAB_DATA); 
+	 public List<ICrosstabData> getCrosstabData(){
+		 return (List<ICrosstabData>)getContext().get(ContextKeys.CONTEXT_KEY_CROSSTAB_DATA); 
 	 }
 	 
 //	 public int[] getDataRelativePositionToHeader(){
@@ -64,8 +64,8 @@ public abstract class AbstractCrosstabStep extends AbstractReportStep {
 		 return (DistinctValuesHolder)getContext().get(ContextKeys.CONTEXT_KEY_INTERMEDIATE_DISTINCT_VALUES_HOLDER); 
 	 }
 	 
-	 public IntermediateDataInfo getIntermediateCrosstabDataInfo(){
-		 return (IntermediateDataInfo)getContext().get(ContextKeys.CONTEXT_KEY_INTERMEDIATE_CROSSTAB_DATA_INFO);
+	 public IntermediateDataInfo[] getIntermediateCrosstabDataInfo(){
+		 return (IntermediateDataInfo[])getContext().get(ContextKeys.CONTEXT_KEY_INTERMEDIATE_CROSSTAB_DATA_INFO);
 	 }
 	 
 	 public IntermediateReportRow getIntermediateRow(){
@@ -105,7 +105,11 @@ public abstract class AbstractCrosstabStep extends AbstractReportStep {
 	    		DistinctValuesHolder ctMetadata = getDistinctValuesHolder(); 
 	    		Object[] prevDataRow = getPreviousRowOfGroupingValues(); 
 	    		if(prevDataRow != null){
-	    			for(int i=from; i < groupingLevel+1; i++){
+	    			//if this is crosstab data return
+        			if(prevDataRow.length < from){
+        				return result;
+        			}
+	    			for(int i=from; i < groupingLevel+1; i++){	    				
 	    				result[i-from] = ctMetadata.getIndexFor(i-from, prevDataRow[i]);
 	    			}
 	    		}else{

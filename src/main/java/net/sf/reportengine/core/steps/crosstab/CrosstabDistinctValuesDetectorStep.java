@@ -1,7 +1,9 @@
 package net.sf.reportengine.core.steps.crosstab;
 
+import java.util.Arrays;
 import java.util.List;
 
+import net.sf.reportengine.config.ICrosstabData;
 import net.sf.reportengine.config.ICrosstabHeaderRow;
 import net.sf.reportengine.core.algorithm.IReportContext;
 import net.sf.reportengine.core.algorithm.NewRowEvent;
@@ -70,11 +72,11 @@ public class CrosstabDistinctValuesDetectorStep extends AbstractCrosstabStep {
 		
 		//first we take care of the distict values that might occur 
 		int indexAfterInsertion = -1; 
-		int[] currDataValueRelativePositionToHeaderValues = new int[headerRows.size()]; 
-		
-		for (int i = 0; i < headerRows.size(); i++) {
+		int[] currDataValueRelativePositionToHeaderValues = new int[headerRows.size()+1]; //1 is for metrics
+		int i = 0;
+		for (; i < headerRows.size(); i++) {
+
 			ICrosstabHeaderRow headerRow = headerRows.get(i);
-			
 			//add value even if it's not a different value we call this method 
 			//for getting teh idex of the value in the distinct values array
 			indexAfterInsertion = distinctValuesHolder.addValueIfNotExist(i, 
@@ -84,10 +86,17 @@ public class CrosstabDistinctValuesDetectorStep extends AbstractCrosstabStep {
 			currDataValueRelativePositionToHeaderValues[i] = indexAfterInsertion; 
 		}
 		
+		//now metrics - last level
+		IntermediateDataInfo[] intermediateDataInfo = new IntermediateDataInfo[getCrosstabData().size()];
 		
-		//getContext().set(CONTEXT_KEY_CROSSTAB_RELATIVE_POSITION, currentDataValueRelativePositionToHeaderValues);
-		getContext().set(ContextKeys.CONTEXT_KEY_INTERMEDIATE_CROSSTAB_DATA_INFO, 
-						new IntermediateDataInfo(getCrosstabData().getValue(newRowEvent), 
-														currDataValueRelativePositionToHeaderValues)); 
+		for(int m = 0; m < getCrosstabData().size(); m++){
+			indexAfterInsertion = distinctValuesHolder.addValueIfNotExist(i, 
+					getCrosstabData().get(m).getLabel());
+			int[] currDataValueRelativePositionToHeaderValuesCrosstab = Arrays.copyOf(currDataValueRelativePositionToHeaderValues,currDataValueRelativePositionToHeaderValues.length);
+			currDataValueRelativePositionToHeaderValuesCrosstab[i] = indexAfterInsertion;
+			intermediateDataInfo[m] = new IntermediateDataInfo(getCrosstabData().get(m).getValue(newRowEvent),currDataValueRelativePositionToHeaderValuesCrosstab, newRowEvent);
+		}
+		
+		getContext().set(ContextKeys.CONTEXT_KEY_INTERMEDIATE_CROSSTAB_DATA_INFO,intermediateDataInfo); 
 	}
 }

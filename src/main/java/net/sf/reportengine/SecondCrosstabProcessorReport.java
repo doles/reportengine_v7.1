@@ -26,9 +26,20 @@ class SecondCrosstabProcessorReport extends AbstractOneIterationReport {
 	
 	private CtMetadata ctMetadata = null; 
 	
+	private boolean compareYears;
+	
 	public SecondCrosstabProcessorReport(CtMetadata metadata){
 		this.ctMetadata = metadata; 
 	}
+	
+	
+	public boolean isCompareYears() {
+		return compareYears;
+	}
+	
+	public void setCompareYears(boolean compareYears) {
+		this.compareYears = compareYears;
+	}	
 	
 	/* (non-Javadoc)
 	 * @see net.sf.reportengine.AbstractReport#configAlgorithmSteps()
